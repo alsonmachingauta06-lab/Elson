@@ -1,90 +1,148 @@
-const { addWelcome, delWelcome, isWelcomeOn, addGoodbye, delGoodBye, isGoodByeOn } = require('../lib/index');
-const { delay } = require('@whiskeysockets/baileys');
+const { handleWelcome } = require('../lib/welcome');
+const { isWelcomeOn, getWelcome } = require('../lib/index');
+const { channelInfo } = require('../lib/messageConfig');
+const fetch = require('node-fetch');
 
-async function handleWelcome(sock, chatId, message, match) {
-    if (!match) {
-        return sock.sendMessage(chatId, {
-            text: `📥 *Welcome Message Setup*\n\n✅ *.welcome on* — Enable welcome messages\n🛠️ *.welcome set Your custom message* — Set a custom welcome message\n🚫 *.welcome off* — Disable welcome messages\n\n*Available Variables:*\n• {user} - Mentions the new member\n• {group} - Shows group name\n• {description} - Shows group description`,
-            quoted: message
-        });
+async function welcomeCommand(sock, chatId, message, match) {
+    // Check if it's a group
+    if (!chatId.endsWith('@g.us')) {
+        await sock.sendMessage(chatId, { text: 'This command can only be used in groups.' });
+        return;
     }
 
-    const [command, ...args] = match.split(' ');
-    const lowerCommand = command.toLowerCase();
-    const customMessage = args.join(' ');
+    // Extract match from message
+    const text = message.message?.conversation || 
+                message.message?.extendedTextMessage?.text || '';
+    const matchText = text.split(' ').slice(1).join(' ');
 
-    if (lowerCommand === 'on') {
-        if (await isWelcomeOn(chatId)) {
-            return sock.sendMessage(chatId, { text: '⚠️ Welcome messages are *already enabled*.', quoted: message });
-        }
-        await addWelcome(chatId, true, 'Welcome {user} to {group}! 🎉');
-        return sock.sendMessage(chatId, { text: '✅ Welcome messages *enabled* with simple message. Use *.welcome set [your message]* to customize.', quoted: message });
-    }
-
-    if (lowerCommand === 'off') {
-        if (!(await isWelcomeOn(chatId))) {
-            return sock.sendMessage(chatId, { text: '⚠️ Welcome messages are *already disabled*.', quoted: message });
-        }
-        await delWelcome(chatId);
-        return sock.sendMessage(chatId, { text: '✅ Welcome messages *disabled* for this group.', quoted: message });
-    }
-
-    if (lowerCommand === 'set') {
-        if (!customMessage) {
-            return sock.sendMessage(chatId, { text: '⚠️ Please provide a custom welcome message. Example: *.welcome set Welcome to the group!*', quoted: message });
-        }
-        await addWelcome(chatId, true, customMessage);
-        return sock.sendMessage(chatId, { text: '✅ Custom welcome message *set successfully*.', quoted: message });
-    }
-
-    // If no valid command is provided
-    return sock.sendMessage(chatId, {
-        text: `❌ Invalid command. Use:\n*.welcome on* - Enable\n*.welcome set [message]* - Set custom message\n*.welcome off* - Disable`,
-        quoted: message
-    });
+    await handleWelcome(sock, chatId, message, matchText);
 }
 
-async function handleGoodbye(sock, chatId, message, match) {
-    const lower = match?.toLowerCase();
+async function handleJoinEvent(sock, id, participants) {
+    // Check if welcome is enabled for this group
+    const isWelcomeEnabled = await isWelcomeOn(id);
+    if (!isWelcomeEnabled) return;
 
-    if (!match) {
-        return sock.sendMessage(chatId, {
-            text: `📤 *Goodbye Message Setup*\n\n✅ *.goodbye on* — Enable goodbye messages\n🛠️ *.goodbye set Your custom message* — Set a custom goodbye message\n🚫 *.goodbye off* — Disable goodbye messages\n\n*Available Variables:*\n• {user} - Mentions the leaving member\n• {group} - Shows group name`,
-            quoted: message
-        });
-    }
+    // Get custom welcome message
+    const customMessage = await getWelcome(id);
 
-    if (lower === 'on') {
-        if (await isGoodByeOn(chatId)) {
-            return sock.sendMessage(chatId, { text: '⚠️ Goodbye messages are *already enabled*.', quoted: message });
+    // Get group metadata
+    const groupMetadata = await sock.groupMetadata(id);
+    const groupName = groupMetadata.subject;
+    const groupDesc = groupMetadata.desc || 'No description available';
+
+    // Send welcome message for each new participant
+    for (const participant of participants) {
+        try {
+            // Handle case where participant might be an object or not a string
+            const participantString = typeof participant === 'string' ? participant : (participant.id || participant.toString());
+            const user = participantString.split('@')[0];
+            
+            // Get user's display name
+            let displayName = user; // Default to phone number
+            try {
+                const contact = await sock.getBusinessProfile(participantString);
+                if (contact && contact.name) {
+                    displayName = contact.name;
+                } else {
+                    // Try to get from group participants
+                    const groupParticipants = groupMetadata.participants;
+                    const userParticipant = groupParticipants.find(p => p.id === participantString);
+                    if (userParticipant && userParticipant.name) {
+                        displayName = userParticipant.name;
+                    }
+                }
+            } catch (nameError) {
+                console.log('Could not fetch display name, using phone number');
+            }
+            
+            // Process custom message with variables
+            let finalMessage;
+            if (customMessage) {
+                finalMessage = customMessage
+                    .replace(/{user}/g, `@${displayName}`)
+                    .replace(/{group}/g, groupName)
+                    .replace(/{description}/g, groupDesc);
+            } else {
+                // Default message if no custom message is set
+                const now = new Date();
+                const timeString = now.toLocaleString('en-US', {
+                    month: '2-digit',
+                    day: '2-digit', 
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: true
+                });
+                
+                finalMessage = `╭╼━≪•𝙽𝙴𝚆 𝙼𝙴𝙼𝙱𝙴𝚁•≫━╾╮\n┃𝚆𝙴𝙻𝙲𝙾𝙼𝙴: @${displayName} 👋\n┃Member count: #${groupMetadata.participants.length}\n┃𝚃𝙸𝙼𝙴: ${timeString}⏰\n╰━━━━━━━━━━━━━━━╯\n\n*@${displayName}* Welcome to *${groupName}*! 🎉\n*Group 𝙳𝙴𝚂𝙲𝚁𝙸𝙿𝚃𝙸𝙾𝙽*\n${groupDesc}\n\n> *ᴘᴏᴡᴇʀᴇᴅ ʙʏ Knight Bot*`;
+            }
+            
+            // Try to send with image first (always try images)
+            try {
+                // Get user profile picture
+                let profilePicUrl = `https://img.pyrocdn.com/dbKUgahg.png`; // Default avatar
+                try {
+                    const profilePic = await sock.profilePictureUrl(participantString, 'image');
+                    if (profilePic) {
+                        profilePicUrl = profilePic;
+                    }
+                } catch (profileError) {
+                    console.log('Could not fetch profile picture, using default');
+                }
+                
+                // Construct API URL for welcome image
+                const apiUrl = `https://api.some-random-api.com/welcome/img/2/gaming3?type=join&textcolor=green&username=${encodeURIComponent(displayName)}&guildName=${encodeURIComponent(groupName)}&memberCount=${groupMetadata.participants.length}&avatar=${encodeURIComponent(profilePicUrl)}`;
+                
+                // Fetch the welcome image
+                const response = await fetch(apiUrl);
+                if (response.ok) {
+                    const imageBuffer = await response.buffer();
+                    
+                    // Send welcome image with caption (custom or default message)
+                    await sock.sendMessage(id, {
+                        image: imageBuffer,
+                        caption: finalMessage,
+                        mentions: [participantString],
+                        ...channelInfo
+                    });
+                    continue; // Skip to next participant
+                }
+            } catch (imageError) {
+                console.log('Image generation failed, falling back to text');
+            }
+            
+            // Send text message (either custom message or fallback)
+            await sock.sendMessage(id, {
+                text: finalMessage,
+                mentions: [participantString],
+                ...channelInfo
+            });
+        } catch (error) {
+            console.error('Error sending welcome message:', error);
+            // Fallback to text message
+            const participantString = typeof participant === 'string' ? participant : (participant.id || participant.toString());
+            const user = participantString.split('@')[0];
+            
+            // Use custom message if available, otherwise use simple fallback
+            let fallbackMessage;
+            if (customMessage) {
+                fallbackMessage = customMessage
+                    .replace(/{user}/g, `@${user}`)
+                    .replace(/{group}/g, groupName)
+                    .replace(/{description}/g, groupDesc);
+            } else {
+                fallbackMessage = `Welcome @${user} to ${groupName}! 🎉`;
+            }
+            
+            await sock.sendMessage(id, {
+                text: fallbackMessage,
+                mentions: [participantString],
+                ...channelInfo
+            });
         }
-        await addGoodbye(chatId, true, 'Goodbye {user} 👋');
-        return sock.sendMessage(chatId, { text: '✅ Goodbye messages *enabled* with simple message. Use *.goodbye set [your message]* to customize.', quoted: message });
     }
-
-    if (lower === 'off') {
-        if (!(await isGoodByeOn(chatId))) {
-            return sock.sendMessage(chatId, { text: '⚠️ Goodbye messages are *already disabled*.', quoted: message });
-        }
-        await delGoodBye(chatId);
-        return sock.sendMessage(chatId, { text: '✅ Goodbye messages *disabled* for this group.', quoted: message });
-    }
-
-    if (lower.startsWith('set ')) {
-        const customMessage = match.substring(4);
-        if (!customMessage) {
-            return sock.sendMessage(chatId, { text: '⚠️ Please provide a custom goodbye message. Example: *.goodbye set Goodbye!*', quoted: message });
-        }
-        await addGoodbye(chatId, true, customMessage);
-        return sock.sendMessage(chatId, { text: '✅ Custom goodbye message *set successfully*.', quoted: message });
-    }
-
-    // If no valid command is provided
-    return sock.sendMessage(chatId, {
-        text: `❌ Invalid command. Use:\n*.goodbye on* - Enable\n*.goodbye set [message]* - Set custom message\n*.goodbye off* - Disable`,
-        quoted: message
-    });
 }
 
-module.exports = { handleWelcome, handleGoodbye };
-// This code handles welcome and goodbye messages in a WhatsApp group using the Baileys library.
+module.exports = { welcomeCommand, handleJoinEvent };

@@ -1,77 +1,215 @@
-class TicTacToe {
-    constructor(playerX = 'x', playerO = 'o') {
-        this.playerX = playerX;
-        this.playerO = playerO;
-        this._currentTurn = false;
-        this._x = 0;
-        this._o = 0;
-        this.turns = 0;
-    }
+const TicTacToe = require('../lib/tictactoe');
 
-    get board() {
-        return this._x | this._o;
-    }
+// Store games globally
+const games = {};
 
-    get currentTurn() {
-        return this._currentTurn ? this.playerO : this.playerX;
-    }
-
-    get winner() {
-        // All possible winning combinations
-        const winningPatterns = [
-            0b111000000, // Top row
-            0b000111000, // Middle row
-            0b000000111, // Bottom row
-            0b100100100, // Left column
-            0b010010010, // Middle column
-            0b001001001, // Right column
-            0b100010001, // Diagonal from top-left
-            0b001010100  // Diagonal from top-right
-        ];
-
-        // Check X's moves
-        for (let pattern of winningPatterns) {
-            if ((this._x & pattern) === pattern) {
-                return this.playerX;
-            }
+async function tictactoeCommand(sock, chatId, senderId, text) {
+    try {
+        // Check if player is already in a game
+        if (Object.values(games).find(room => 
+            room.id.startsWith('tictactoe') && 
+            [room.game.playerX, room.game.playerO].includes(senderId)
+        )) {
+            await sock.sendMessage(chatId, { 
+                text: '❌ You are still in a game. Type *surrender* to quit.' 
+            });
+            return;
         }
 
-        // Check O's moves
-        for (let pattern of winningPatterns) {
-            if ((this._o & pattern) === pattern) {
-                return this.playerO;
-            }
-        }
+        // Look for existing room
+        let room = Object.values(games).find(room => 
+            room.state === 'WAITING' && 
+            (text ? room.name === text : true)
+        );
 
-        return null;
-    }
+        if (room) {
+            // Join existing room
+            room.o = chatId;
+            room.game.playerO = senderId;
+            room.state = 'PLAYING';
 
-    turn(player, pos) {
-        // If game is over or invalid position
-        if (this.winner || pos < 0 || pos > 8) return -1;
-        
-        // If position is already taken
-        if ((this._x | this._o) & (1 << pos)) return 0;
-        
-        // Make the move
-        const value = 1 << pos;
-        if (this._currentTurn) {
-            this._o |= value;
+            const arr = room.game.render().map(v => ({
+                'X': '❎',
+                'O': '⭕',
+                '1': '1️⃣',
+                '2': '2️⃣',
+                '3': '3️⃣',
+                '4': '4️⃣',
+                '5': '5️⃣',
+                '6': '6️⃣',
+                '7': '7️⃣',
+                '8': '8️⃣',
+                '9': '9️⃣',
+            }[v]));
+
+            const str = `
+🎮 *TicTacToe Game Started!*
+
+Waiting for @${room.game.currentTurn.split('@')[0]} to play...
+
+${arr.slice(0, 3).join('')}
+${arr.slice(3, 6).join('')}
+${arr.slice(6).join('')}
+
+▢ *Room ID:* ${room.id}
+▢ *Rules:*
+• Make 3 rows of symbols vertically, horizontally or diagonally to win
+• Type a number (1-9) to place your symbol
+• Type *surrender* to give up
+`;
+
+            // Send message only once to the group
+            await sock.sendMessage(chatId, { 
+                text: str,
+                mentions: [room.game.currentTurn, room.game.playerX, room.game.playerO]
+            });
+
         } else {
-            this._x |= value;
-        }
-        
-        this._currentTurn = !this._currentTurn;
-        this.turns++;
-        return 1;
-    }
+            // Create new room
+            room = {
+                id: 'tictactoe-' + (+new Date),
+                x: chatId,
+                o: '',
+                game: new TicTacToe(senderId, 'o'),
+                state: 'WAITING'
+            };
 
-    render() {
-        return [...Array(9)].map((_, i) => {
-            const bit = 1 << i;
-            return this._x & bit ? 'X' : this._o & bit ? 'O' : i + 1;
+            if (text) room.name = text;
+
+            await sock.sendMessage(chatId, { 
+                text: `⏳ *Waiting for opponent*\nType *.ttt ${text || ''}* to join!`
+            });
+
+            games[room.id] = room;
+        }
+
+    } catch (error) {
+        console.error('Error in tictactoe command:', error);
+        await sock.sendMessage(chatId, { 
+            text: '❌ Error starting game. Please try again.' 
         });
     }
 }
 
-module.exports = TicTacToe; 
+async function handleTicTacToeMove(sock, chatId, senderId, text) {
+    try {
+        // Find player's game
+        const room = Object.values(games).find(room => 
+            room.id.startsWith('tictactoe') && 
+            [room.game.playerX, room.game.playerO].includes(senderId) && 
+            room.state === 'PLAYING'
+        );
+
+        if (!room) return;
+
+        const isSurrender = /^(surrender|give up)$/i.test(text);
+        
+        if (!isSurrender && !/^[1-9]$/.test(text)) return;
+
+        // Allow surrender at any time, not just during player's turn
+        if (senderId !== room.game.currentTurn && !isSurrender) {
+            await sock.sendMessage(chatId, { 
+                text: '❌ Not your turn!' 
+            });
+            return;
+        }
+
+        let ok = isSurrender ? true : room.game.turn(
+            senderId === room.game.playerO,
+            parseInt(text) - 1
+        );
+
+        if (!ok) {
+            await sock.sendMessage(chatId, { 
+                text: '❌ Invalid move! That position is already taken.' 
+            });
+            return;
+        }
+
+        let winner = room.game.winner;
+        let isTie = room.game.turns === 9;
+
+        const arr = room.game.render().map(v => ({
+            'X': '❎',
+            'O': '⭕',
+            '1': '1️⃣',
+            '2': '2️⃣',
+            '3': '3️⃣',
+            '4': '4️⃣',
+            '5': '5️⃣',
+            '6': '6️⃣',
+            '7': '7️⃣',
+            '8': '8️⃣',
+            '9': '9️⃣',
+        }[v]));
+
+        if (isSurrender) {
+            // Set the winner to the opponent of the surrendering player
+            winner = senderId === room.game.playerX ? room.game.playerO : room.game.playerX;
+            
+            // Send a surrender message
+            await sock.sendMessage(chatId, { 
+                text: `🏳️ @${senderId.split('@')[0]} has surrendered! @${winner.split('@')[0]} wins the game!`,
+                mentions: [senderId, winner]
+            });
+            
+            // Delete the game immediately after surrender
+            delete games[room.id];
+            return;
+        }
+
+        let gameStatus;
+        if (winner) {
+            gameStatus = `🎉 @${winner.split('@')[0]} wins the game!`;
+        } else if (isTie) {
+            gameStatus = `🤝 Game ended in a draw!`;
+        } else {
+            gameStatus = `🎲 Turn: @${room.game.currentTurn.split('@')[0]} (${senderId === room.game.playerX ? '❎' : '⭕'})`;
+        }
+
+        const str = `
+🎮 *TicTacToe Game*
+
+${gameStatus}
+
+${arr.slice(0, 3).join('')}
+${arr.slice(3, 6).join('')}
+${arr.slice(6).join('')}
+
+▢ Player ❎: @${room.game.playerX.split('@')[0]}
+▢ Player ⭕: @${room.game.playerO.split('@')[0]}
+
+${!winner && !isTie ? '• Type a number (1-9) to make your move\n• Type *surrender* to give up' : ''}
+`;
+
+        const mentions = [
+            room.game.playerX, 
+            room.game.playerO,
+            ...(winner ? [winner] : [room.game.currentTurn])
+        ];
+
+        await sock.sendMessage(room.x, { 
+            text: str,
+            mentions: mentions
+        });
+
+        if (room.x !== room.o) {
+            await sock.sendMessage(room.o, { 
+                text: str,
+                mentions: mentions
+            });
+        }
+
+        if (winner || isTie) {
+            delete games[room.id];
+        }
+
+    } catch (error) {
+        console.error('Error in tictactoe move:', error);
+    }
+}
+
+module.exports = {
+    tictactoeCommand,
+    handleTicTacToeMove
+};
