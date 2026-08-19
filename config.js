@@ -1,28 +1,19 @@
-require('dotenv').config();
+const fs = require('fs');
+const path = require('path');
 
-global.APIs  =  {
-    xteam: 'https://api.xteam.xyz',
-    dzx: 'https://api.dhamzxploit.my.id',
-    lol: 'https://api.lolhuman.xyz',
-    violetics: 'https://violetics.pw',
-    neoxr: 'https://api.neoxr.my.id',
-    zenzapis: 'https://zenzapis.xyz',
-    akuari: 'https://api.akuari.my.id',
-    akuari2: 'https://apimu.my.id',
-    nrtm: 'https://fg-nrtm.ddns.net',
-    bg: 'http://bochil.ddns.net',
-    fgmods: 'https://api-fgmods.ddns.net'
-};
+global.owner = ['263786359833'];
+global.ownername = "Alson Machingauta";
+global.botname = "Alson-XMD";
+global.channelname = "Alson XMD";
+global.channellink = "https://whatsapp.com/channel/0029Vb8pa9p5kg7CkpkxrR37";
+global.prefix = ".";
+global.language = "en";
 
-global.APIKeys = {
-    'https://api.xteam.xyz': 'd90a9e986e18778b',
-    'https://api.lolhuman.xyz': '85faf717d0545d14074659ad',
-    'https://api.neoxr.my.id': 'yourkey',
-    'https://violetics.pw': 'beta',
-    'https://zenzapis.xyz': 'yourkey',
-    'https://api-fgmods.ddns.net': 'fg-dylux'
-
-};
-    module.exports = {
-    WARN_COUNT: 3.  
+module.exports = {
+  owner: global.owner,
+  ownername: global.ownername,
+  botname: global.botname,
+  channelname: global.channelname,
+  channellink: global.channellink,
+  prefix: global.prefix
 };
