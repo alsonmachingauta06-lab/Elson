@@ -62,8 +62,8 @@ Click the button below to fork the Alson XMD repository to your GitHub account:
 Deploy the bot and easily connect it to your WhatsApp account by pair code. Click the button below to deploy the bot on Replit.
 
 <div align="center">
-  <a href="https://knight-bot-paircode.onrender.com" target="_blank">
-    <img src="https://img.shields.io/badge/GET%20PAIR%20CODE-Easy%20Method-ff4d4d?style=for-the-badge" alt="Generate Pair Code"/>
+  <a href="https://github.com/alson/Elson" target="_blank">
+<img src="https://img.shields.io/badge/FORK%20REPO-ALSON--XMD-00C853?style=for-the-badge&logo=github"/>
   </a>
 </div>
 
@@ -75,7 +75,11 @@ Deploy the bot and easily connect it to your WhatsApp account by pair code. Clic
 ### Step 3: Deploy Now
 
 For further customization and setup guidance, click the button below:
-
+<div align="center">
+<a href="https://railway.app/new/template?template=https://github.com/alson/Elson" target="_blank">
+<img src="https://railway.app/button.svg"/>
+</a>
+</div>
 <div align="center">
   <a href="https://youtu.be/-oz_u1iMgf8">
     <img src="https://img.shields.io/badge/Deploy Tutorial-dc3545?style=for-the-badge&logo=youtube" alt="YouTube Link"/>
