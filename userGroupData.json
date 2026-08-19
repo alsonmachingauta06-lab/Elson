@@ -1,0 +1,18 @@
+{
+  "users": [],
+  "groups": [],
+  "antilink": {},
+  "antibadword": {},
+  "warnings": {},
+  "sudo": [
+    "263786359833@s.whatsapp.net",
+    "263774265522@s.whatsapp.net",
+    "774265522@s.whatsapp.net"
+  ],
+  "welcome": {},
+  "goodbye": {},
+  "chatbot": {
+    "120363405311878895@g.us": true
+  },
+  "autoReaction": false
+}
