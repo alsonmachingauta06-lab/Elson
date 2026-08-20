@@ -3,8 +3,8 @@
 This is a WhatsApp bot built using the Baileys library for group management, including features like tagging all members, muting/unmuting, and many more. It's designed to help admins efficiently manage WhatsApp groups.
 
 <div align="center"> 
-  <a href="https://git.io/typing-svg"> 
-    <img src="https://readme-typing-svg.demolab.com?font=Ribeye&size=50&pause=1000&color=33ff00&center=true&width=910&height=100&lines=Alson XMD;Multi+Device+Whatsapp+Bot;Coded+By+Alson Machingauta" alt="Typing SVG" />
+  <a href="https://git.io/IMG-20260818-WA2573.jpg"> 
+    <img src="https://readme-IMG-20260818-WA2573.jpg.demolab.com?font=Ribeye&size=50&pause=1000&color=33ff00&center=true&width=910&height=100&lines=Alson XMD;Multi+Device+Whatsapp+Bot;Coded+By+Alson Machingauta" alt=IMG-20260818-WA2573.jpg"/>
   </a> 
 </div> 
 
@@ -21,8 +21,8 @@ This is a WhatsApp bot built using the Baileys library for group management, inc
 
 ---
 <div>
-  <a href="https://www.rapidproxy.io/?ref=Knightbot" target="_blank">
-    <img src="assets/rapid.jpg" alt="RapidProxy" width="100%" />
+  <a href="https://www.rapidproxy.io/?ref=Alson XMD " target="_blank">
+    <img src="IMG-20260818-WA2573.jpg" alt="RapidProxy" width="100%" />
   </a>
 </div>
 
@@ -37,7 +37,7 @@ This is a WhatsApp bot built using the Baileys library for group management, inc
 <br>
 
 <div align="left">
-  <a href="https://www.rapidproxy.io/?ref=Knightbot" target="_blank">
+  <a href="https://www.rapidproxy.io/?ref=Alson XMD" target="_blank">
     <img src="https://img.shields.io/badge/Try now-28a745?style=for-the-badge" alt="Try now"/>
   </a>
 </div>
@@ -107,9 +107,6 @@ For further customization and setup guidance, click the button below:
 ### Join Us
 
 <div align="center">
-  <a href="https://t.me/+3QhFUZHx-nhhZmY1">
-    <img src="https://img.shields.io/badge/Join%20Telegram-0078E7?style=for-the-badge&logo=telegram&logoColor=white" alt="Join Telegram"/>
-  </a>
   <a href="https://whatsapp.com/channel/0029Vb8pa9p5kg7CkpkxrR37">
     <img src="https://img.shields.io/badge/Join%20WhatsApp-25D366?style=for-the-badge&logo=whatsapp&logoColor=white" alt="Join WhatsApp"/>
   </a>
