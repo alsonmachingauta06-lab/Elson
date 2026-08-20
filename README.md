@@ -146,8 +146,8 @@ It is lightweight and can be easily customized to add more commands as per your 
 1. **Clone the repository:**
 
     ```bash
-    git clone https://github.com/alsonmachingauta06-lab/Alson-XMD-.git
-    cd Alson XMD
+    git clone https://github.com/alsonmachingauta06-lab/Elson .git
+    cd Elson 
     ```
 
 2. **Install the dependencies:**
@@ -207,7 +207,7 @@ If you like this project, please give it a [⭐️ star on GitHub](https://githu
 
 ## Credits
 
-- [Professor](https://github.com/alsonmachingauta06-lab)
+- [Alson Machingauta](https://github.com/alsonmachingauta06-lab)
 - [Baileys](https://github.com/adiwajshing/Baileys)
 - [TechGod143](https://github.com/TechGod143) for pair code
 - [Dgxeon](https://github.com/Dgxeon) for pair code
@@ -235,7 +235,7 @@ This project is licensed under the MIT License. However, you must:
 
 ## 📜 Copyright Notice
 
-Copyright (c) 2024 Professor. All rights reserved.
+Copyright (c) 2026 Alson Machingauta All rights reserved.
 
 This project contains code from various open source projects:
 - Baileys (MIT License)
