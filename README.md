@@ -14,9 +14,9 @@ This is a WhatsApp bot built using the Baileys library for group management, inc
 
 <div align="center">
   <img src="https://img.shields.io/github/followers/alsonmachingauta06-lab?style=for-the-badge&label=Followers" alt="Followers"/>
-  <img src="https://img.shields.io/github/stars/alsonmachingauta/Also XMD?style=for-the-badge&label=Stars" alt="Stars"/>
-  <img src="https://img.shields.io/github/forks/alsonmachingauta06-lab/Alson XMD?style=for-the-badge&label=Forks" alt="Forks"/>
-  <img src="https://img.shields.io/github/watchers/alsonmachingauta06-lab/Alson XMD?style=for-the-badge&label=Watchers" alt="Watchers"/>
+  <img src="https://img.shields.io/github/stars/alsonmachingauta/Elson?style=for-the-badge&label=Stars" alt="Stars"/>
+  <img src="https://img.shields.io/github/forks/alsonmachingauta06-lab/Elson?style=for-the-badge&label=Forks" alt="Forks"/>
+  <img src="https://img.shields.io/github/watchers/alsonmachingauta06-lab/Elson?style=for-the-badge&label=Watchers" alt="Watchers"/>
 </div>
 
 ---
@@ -50,7 +50,7 @@ This is a WhatsApp bot built using the Baileys library for group management, inc
 Click the button below to fork the Alson XMD repository to your GitHub account:
 
 <div align="center">
-  <a href="https://github.com/alsonmachingauta06-lab/Alson XMD/fork">
+  <a href="https://github.com/alsonmachingauta06-lab/Elson/fork">
     <img src="https://img.shields.io/badge/Fork-Repository-blue?style=for-the-badge" alt="Fork the repository"/>
   </a>
 </div>
@@ -62,7 +62,7 @@ Click the button below to fork the Alson XMD repository to your GitHub account:
 Deploy the bot and easily connect it to your WhatsApp account by pair code. Click the button below to deploy the bot on Replit.
 
 <div align="center">
-  <a href="https://github.com/alson/Elson" target="_blank">
+  <a href="https://github.com/alsonmachingauta06-lab/Elson" target="_blank">
 <img src="https://img.shields.io/badge/FORK%20REPO-ALSON--XMD-00C853?style=for-the-badge&logo=github"/>
   </a>
 </div>
@@ -76,7 +76,7 @@ Deploy the bot and easily connect it to your WhatsApp account by pair code. Clic
 
 For further customization and setup guidance, click the button below:
 <div align="center">
-<a href="https://railway.app/new/template?template=https://github.com/alson/Elson" target="_blank">
+<a href="https://railway.app/new/template?template=https://github.com/alsonmachingauta06-lab/Elson" target="_blank">
 <img src="https://railway.app/button.svg"/>
 </a>
 </div>
